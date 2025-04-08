@@ -7,10 +7,16 @@
 
 import Foundation
 
+/// Represents a finalized 5-card poker hand along with its evaluated rank.
+/// Used to compare hands, break ties, and describe hands in human-readable form.
 struct HandResult: Comparable, CustomStringConvertible {
+    /// The rank of the hand (e.g., full house, flush, etc.)
     let rank: HandRank
-    let cards: [Card] // best 5-card hand
 
+    /// The actual 5 cards making up the best hand
+    let cards: [Card]
+
+    /// Describes the hand in a readable format (e.g., "Two Pair: Kings and Nines with Ace kicker")
     var description: String {
         switch rank {
         case .onePair:
@@ -40,12 +46,16 @@ struct HandResult: Comparable, CustomStringConvertible {
         }
     }
 
+    // MARK: - Descriptive Helpers
+
+    /// Describes a one-pair hand with its kicker
     private func describePair() -> String {
         let pair = findDuplicates(count: 2).first ?? "?"
         let kicker = kickerRanks(excluding: [pair]).first ?? "?"
         return "Pair of \(pair)s with \(kicker) kicker"
     }
 
+    /// Describes a two-pair hand with its kicker
     private func describeTwoPair() -> String {
         let pairs = findDuplicates(count: 2)
         if pairs.count >= 2 {
@@ -56,23 +66,29 @@ struct HandResult: Comparable, CustomStringConvertible {
         return "Two Pair"
     }
 
+    /// Describes a three-of-a-kind hand
     private func describeTrips() -> String {
         let trips = findDuplicates(count: 3).first ?? "?"
         return "Three of a Kind: \(trips)s"
     }
 
+    /// Describes a full house hand
     private func describeFullHouse() -> String {
         let trips = findDuplicates(count: 3).first ?? "?"
         let pair = findDuplicates(count: 2).first ?? "?"
         return "Full House: \(trips)s full of \(pair)s"
     }
 
+    /// Describes a four-of-a-kind hand with kicker
     private func describeQuads() -> String {
         let quad = findDuplicates(count: 4).first ?? "?"
         let kicker = kickerRanks(excluding: [quad]).first ?? "?"
         return "Four of a Kind: \(quad)s with \(kicker) kicker"
     }
 
+    // MARK: - Duplicate & Kicker Logic
+
+    /// Finds all ranks with exactly a given duplicate count (e.g., all pairs, trips, etc.)
     private func findDuplicates(count: Int) -> [String] {
         let grouped = Dictionary(grouping: cards, by: { $0.rank })
         return grouped
@@ -81,6 +97,7 @@ struct HandResult: Comparable, CustomStringConvertible {
             .sorted(by: rankStrength)
     }
 
+    /// Returns all card ranks sorted by strength, excluding any given ones
     private func kickerRanks(excluding: [String]) -> [String] {
         return cards
             .map { $0.rank }
@@ -88,11 +105,15 @@ struct HandResult: Comparable, CustomStringConvertible {
             .sorted(by: rankStrength)
     }
 
+    /// Rank comparison helper (high cards > low cards)
     private func rankStrength(_ lhs: String, _ rhs: String) -> Bool {
         let order = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
         return (order.firstIndex(of: lhs) ?? 0) > (order.firstIndex(of: rhs) ?? 0)
     }
 
+    // MARK: - Comparable Conformance
+
+    /// Enables sorting hands to determine which is stronger
     static func < (lhs: HandResult, rhs: HandResult) -> Bool {
         if lhs.rank != rhs.rank {
             return lhs.rank < rhs.rank
@@ -110,7 +131,9 @@ struct HandResult: Comparable, CustomStringConvertible {
     }
 }
 
-// ✅ Keep this outside the struct
+// MARK: - Equatable Conformance
+
+/// Compares two hands by rank and exact 5-card combination
 extension HandResult: Equatable {
     static func == (lhs: HandResult, rhs: HandResult) -> Bool {
         return lhs.rank == rhs.rank &&

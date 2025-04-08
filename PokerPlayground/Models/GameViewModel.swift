@@ -5,25 +5,29 @@
 //  Created by Omar Ahmad on 4/7/25.
 //
 
-
 import Foundation
 
+/// Represents the current phase of a Texas Hold'em hand.
+enum GamePhase {
+    case preflop, flop, turn, river, showdown
+}
+
+/// Observable class that manages the full state of the game, including
+/// players, cards, deck, and phase transitions.
 class GameViewModel: ObservableObject {
     @Published var players: [Player] = []
     @Published var communityCards: [Card] = []
-
-    private var deck = Deck()
-    
-    enum GamePhase {
-        case preflop, flop, turn, river, showdown
-    }
-    
     @Published var phase: GamePhase = .preflop
 
+    private var deck = Deck()
+
+    /// Initializes a new game view model and starts the game immediately.
     init() {
         startNewGame()
     }
 
+    /// Starts a new game with a given number of players (default 2).
+    /// - Parameter playerCount: Number of players to include
     func startNewGame(playerCount: Int = 2) {
         deck.reset()
         communityCards = []
@@ -34,18 +38,31 @@ class GameViewModel: ObservableObject {
         }
     }
 
-    func dealFlop() {
-        communityCards.append(contentsOf: deck.deal(3))
+    /// Deals the next card(s) based on the current game phase:
+    /// - Preflop → Flop (3 cards)
+    /// - Flop → Turn (1 card)
+    /// - Turn → River (1 card)
+    /// - River → Showdown (no cards)
+    func nextPhase() {
+        switch phase {
+        case .preflop:
+            communityCards.append(contentsOf: deck.deal(3))
+            phase = .flop
+        case .flop:
+            communityCards.append(contentsOf: deck.deal(1))
+            phase = .turn
+        case .turn:
+            communityCards.append(contentsOf: deck.deal(1))
+            phase = .river
+        case .river:
+            phase = .showdown
+        case .showdown:
+            break
+        }
     }
 
-    func dealTurn() {
-        communityCards.append(contentsOf: deck.deal(1))
-    }
-
-    func dealRiver() {
-        communityCards.append(contentsOf: deck.deal(1))
-    }
-    
+    /// Evaluates the best hand for each player and returns a summary string.
+    /// - Returns: An array of strings describing each player's best hand.
     func evaluateHands() -> [String] {
         return players.map { player in
             let fullHand = player.hand + communityCards
@@ -53,7 +70,9 @@ class GameViewModel: ObservableObject {
             return "\(player.name): \(result.description)"
         }
     }
-    
+
+    /// Determines the winner(s) by evaluating all player hands and comparing them.
+    /// - Returns: An array of player(s) who have the best hand (handles ties).
     func winner() -> [Player] {
         let ranked = players.map { player in
             (player, HandEvaluator.evaluateBestHand(player.hand + communityCards))
@@ -63,24 +82,4 @@ class GameViewModel: ObservableObject {
 
         return ranked.filter { $0.1 == best }.map { $0.0 }
     }
-    
-    func nextPhase() {
-        switch phase {
-        case .preflop:
-            communityCards.append(contentsOf: deck.deal(3)) // flop
-            phase = .flop
-        case .flop:
-            communityCards.append(contentsOf: deck.deal(1)) // turn
-            phase = .turn
-        case .turn:
-            communityCards.append(contentsOf: deck.deal(1)) // river
-            phase = .river
-        case .river:
-            phase = .showdown
-        case .showdown:
-            break // no more cards
-        }
-    }
 }
-
-

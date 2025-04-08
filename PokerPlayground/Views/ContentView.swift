@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+/// The main game UI that shows players, cards, and controls.
+/// Binds to a `GameViewModel` to manage game state.
 struct ContentView: View {
     @StateObject private var game = GameViewModel()
 
@@ -16,6 +18,7 @@ struct ContentView: View {
                 .font(.largeTitle)
                 .bold()
 
+            // Player hands
             HStack {
                 ForEach(game.players) { player in
                     VStack {
@@ -30,6 +33,7 @@ struct ContentView: View {
                 }
             }
 
+            // Evaluated hands (description)
             VStack {
                 ForEach(game.evaluateHands(), id: \.self) { result in
                     Text(result)
@@ -37,7 +41,8 @@ struct ContentView: View {
                         .foregroundColor(.white)
                 }
             }
-            
+
+            // Community cards
             VStack {
                 Text("Community Cards")
                 HStack {
@@ -47,6 +52,7 @@ struct ContentView: View {
                 }
             }
 
+            // Controls
             HStack {
                 Button("New Game") {
                     game.startNewGame()
@@ -62,7 +68,7 @@ struct ContentView: View {
     }
 }
 
-
+/// Provides a live SwiftUI preview of the game UI using a test game model.
 #Preview {
     ContentView()
         .environmentObject(GameViewModel())
