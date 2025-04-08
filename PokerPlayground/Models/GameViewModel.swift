@@ -7,6 +7,8 @@
 
 import Foundation
 
+
+
 private var dealerIndex: Int = 0
 private let smallBlindAmount = 10
 private let bigBlindAmount = 20
@@ -24,6 +26,8 @@ enum PlayerAction {
 
 /// Manages full game state, including players, AI, turn flow, pot, and hand resolution.
 class GameViewModel: ObservableObject {
+    @Published var showHandResult = false
+    @Published var handSummary: [String] = []
     @Published var players: [Player] = []
     @Published var communityCards: [Card] = []
     @Published var phase: GamePhase = .preflop
@@ -113,7 +117,7 @@ class GameViewModel: ObservableObject {
         var contribution = 0
 
         print("→ BEFORE action: \(player.name) | currentBet: \(player.currentBet) | balance: \(player.balance)")
-        print("To call: \(toCall) | HighestBet: \(highestBet)")
+        print("To call for \(player.name): \(toCall) | HighestBet: \(highestBet)")
 
         switch action {
         case .callOrCheck:
@@ -123,7 +127,11 @@ class GameViewModel: ObservableObject {
         case .raise:
             let raiseAmount = 50
             let totalRaise = toCall + raiseAmount
-            contribution = min(player.balance, totalRaise)
+            if player.balance <= toCall {
+                contribution = player.balance  // all-in call
+            } else {
+                contribution = min(player.balance, totalRaise)
+            }
 
         case .fold:
             players[currentPlayerIndex].isFolded = true
@@ -241,30 +249,37 @@ class GameViewModel: ObservableObject {
     /// Ends the hand, awards pot to winner(s), and prepares new hand.
     private func endHand(winners: [Player]) {
         let splitPot = pot / winners.count
+        var summary: [String] = []
 
         for i in players.indices {
-            if winners.contains(where: { $0.id == players[i].id }) {
-                players[i].balance += splitPot
-            }
+            let bet = players[i].currentBet  // ✅ Capture before resetting
+            let wasWinner = winners.contains(where: { $0.id == players[i].id })
+            let won = wasWinner ? splitPot : 0
+            let net = won - bet
+            players[i].balance += won
+            summary.append("\(players[i].name): Bet \(bet), Won \(won), Net \(net), New Balance: \(players[i].balance)")
         }
-        
+
+        handSummary = summary
+        showHandResult = true
+
         print("🏆 Winners: \(winners.map { $0.name }.joined(separator: ", "))")
         print("💰 Pot awarded: \(pot)")
-        
-        // Reset pot and bets
+
+        // Now safe to reset
         pot = 0
         highestBet = 0
-
         for i in players.indices {
             players[i].currentBet = 0
         }
+    }
+    
         
 
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            self.startNewHand()
-        }
-    }
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+//            self.startNewHand()
+  
 
     /// Evaluates the best hand for each player for display or comparison.
     func evaluateHands() -> [String] {
