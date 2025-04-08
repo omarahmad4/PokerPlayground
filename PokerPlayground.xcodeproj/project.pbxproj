@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		07D7FBA12DA4A88900F67967 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 07D7FB9F2DA4A88500F67967 /* README.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		077E73252DA4549F0032917C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		077E73162DA4549D0032917C /* PokerPlayground.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PokerPlayground.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		077E73242DA4549F0032917C /* PokerPlaygroundTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PokerPlaygroundTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		077E732E2DA4549F0032917C /* PokerPlaygroundUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PokerPlaygroundUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		07D7FB9F2DA4A88500F67967 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +80,7 @@
 		077E730D2DA4549D0032917C = {
 			isa = PBXGroup;
 			children = (
+				07D7FB9F2DA4A88500F67967 /* README.md */,
 				077E73182DA4549D0032917C /* PokerPlayground */,
 				077E73272DA4549F0032917C /* PokerPlaygroundTests */,
 				077E73312DA4549F0032917C /* PokerPlaygroundUITests */,
@@ -212,6 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				07D7FBA12DA4A88900F67967 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
